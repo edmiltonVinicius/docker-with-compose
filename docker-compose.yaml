@@ -1,0 +1,42 @@
+version: '3.3'
+
+networks:
+  fabricio_net:
+    driver: bridge
+
+volumes:
+  fabricio_mariadb_vol: {}
+  fabricio_wordpress_vol: {}
+
+services:
+  mariadb:
+    container_name: maria_db
+    image: mariadb
+    networks:
+      - fabricio_net
+    volumes:
+      - fabricio_mariadb_vol:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "wordpress"
+      MYSQL_DATABASE: ${DB_NAME_WORDPRESS}
+      MYSQL_USER: ${DB_USER_WORDPRESS}
+      MYSQL_PASSWORD: ${DB_PASSWORD_WORDPRESS}
+    restart: always
+    
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    networks:
+      - fabricio_net
+    volumes:
+      - fabricio_wordpress_vol:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_USER: ${DB_USER_WORDPRESS}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD_WORDPRESS}
+      WORDPRESS_DB_NAME: ${DB_NAME_WORDPRESS}
+    ports:
+      - 8080:80
+    restart: always
+    depends_on:
+      - mariadb
